@@ -173,7 +173,7 @@ impl CPU {
                 match opcode {
                     0x00E0 => instruction = Instruction::Display,
                     0x00EE => instruction = Instruction::Return,
-                    _ => eprintln!("Unexpected opcode"),
+                    _ => eprintln!("Unexpected opcode: {:X}", opcode),
                 }
             },
             0x1000 => instruction = Instruction::JUMP { address: opcode & 0x0FFF },
@@ -194,7 +194,7 @@ impl CPU {
                     0x8006 => instruction = Instruction::SHFTR { register1: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8), register2: Target_Register::u8_to_register((opcode & 0x00F0).rotate_right(1) as u8) },
                     0x8007 => instruction = Instruction::SUBY { register1: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8), register2: Target_Register::u8_to_register((opcode & 0x00F0).rotate_right(1) as u8) },
                     0x800E => instruction = Instruction::SHFTL { register1: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8), register2: Target_Register::u8_to_register((opcode & 0x00F0).rotate_right(1) as u8) },
-                    _ => eprintln!("Unexpected opcode"),
+                    _ => eprintln!("Unexpected opcode: {:X}", opcode),
                 }
             },
             0x9000 => instruction = Instruction::SKRNEQ { register1: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8), register2: Target_Register::u8_to_register((opcode & 0x00F0).rotate_right(1) as u8)},
@@ -206,7 +206,7 @@ impl CPU {
                 match opcode & 0xF0FF {
                     0xE09E => instruction = Instruction::SKKEQ { register: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8) },
                     0xE0A1 => instruction = Instruction::SKKNEQ { register: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8) },
-                    _ => eprintln!("Unexpected opcode."),
+                    _ => eprintln!("Unexpected opcode: {:X}", opcode),
                 }
             },
             0xF000 => {
@@ -220,10 +220,10 @@ impl CPU {
                     0xF033 => instruction = Instruction::BCD { register: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8) },
                     0xF055 => instruction = Instruction::DUMP { register: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8) },
                     0xF065 => instruction = Instruction::LOAD { register: Target_Register::u8_to_register((opcode & 0x0F00).rotate_right(2) as u8) },
-                    _ => eprintln!("Unexpected opcode."),
+                    _ => eprintln!("Unexpected opcode: {:X}", opcode),
                 }
             },
-            _ => eprintln!("Unexpected opcode."),
+            _ => eprintln!("Unexpected opcode: {:X}", opcode),
         };
         instruction
     }
@@ -231,6 +231,7 @@ impl CPU {
     fn execute(&mut self, instruction: Instruction) {
         match instruction {
             Instruction::Call { address: a } => self.Call(a),
+            Instruction::JUMP { address: a } => self.JUMP(a),
             Instruction::SET { register: r, value: v } => self.SET(r, v),
             Instruction::SETI { value: v } => self.SETI(v),
             _ => eprintln!("Unexpected instruction. Last instruction received: {:?}", instruction),
@@ -269,6 +270,10 @@ impl CPU {
             _ => eprintln!("Error setting register."),
         };
     }
+
+    fn JUMP(&mut self, address: u16) {
+        self.registers.PC = address;
+    }
     
     fn print_registers_state(&self) {
         println!("Current CPU registers
@@ -293,6 +298,8 @@ fn main() {
                 chip8.cycle();
                 chip8.cycle();
                 chip8.cycle();
+                chip8.cycle();
+                chip8.cycle();
 
                 chip8.print_registers_state();
             } else {
@@ -302,3 +309,5 @@ fn main() {
         Err(e) => eprintln!("Something went wrong with your input. Please try again."),
     };
 }
+
+
