@@ -3,14 +3,16 @@ use std::io;
 
 #[derive(Debug)]
 struct Registers {
-    V0: u8, V1: u8, V2: u8, V3: u8,
+    V0: u8, V1: u8, V2: u8, V3: u8, V4: u8, V5: u8, V6: u8, V7: u8,
+    V8: u8, V9: u8, VA: u8, VB: u8, VC: u8, VD: u8, VE: u8, VF: u8,
     I: u16, PC: u16,
 }
 
 impl Registers {
     fn new() -> Registers {
         Registers {
-            V0: 0, V1: 0, V2: 0, V3: 0,
+            V0: 0, V1: 0, V2: 0, V3: 0, V4: 0, V5: 0, V6: 0, V7: 0,
+            V8: 0, V9: 0, VA: 0, VB: 0, VC: 0, VD: 0, VE: 0, VF: 0,
             I: 0, PC: 0,
         }
     }
@@ -93,21 +95,22 @@ enum Instruction {
 struct CPU {
     registers: Registers,
     memory: [u8; 4096],
-    stack: [u16; 16],
+    stack: Vec<u16>,
 }
 
 #[allow(dead_code)]
 impl CPU {
-    fn load_rom(&mut self, rom: &String) {
+    fn load_rom(&mut self, rom: &String) -> Result<&str, io::Error> {
         match fs::read(rom.trim()) {
             Ok(x) => {
                 for y in 0..x.len() {
                     self.memory[0x200 + y] = x[y];
                 };
                 self.registers.PC = 0x200; //Programs begin at this address
+                Ok("ROM loaded successfully.")
             },
-            Err(e) => eprintln!("{}", e),
-        };
+            Err(e) => Err(e),
+        }
     }
     
     fn fetch_instruction(&mut self) -> u16 {
@@ -123,7 +126,7 @@ impl CPU {
         CPU {
             registers: Registers::new(),
             memory: [0u8; 4096],
-            stack: [16u16; 16],
+            stack: vec![0u16; 16],
         }
     }
 
@@ -132,18 +135,28 @@ impl CPU {
         self.registers.V1 = self.registers.V1 ^ self.registers.V1;
         self.registers.V2 = self.registers.V2 ^ self.registers.V2;
         self.registers.V3 = self.registers.V3 ^ self.registers.V3;
+        self.registers.V4 = self.registers.V4 ^ self.registers.V4;
+        self.registers.V5 = self.registers.V5 ^ self.registers.V5;
+        self.registers.V6 = self.registers.V6 ^ self.registers.V6;
+        self.registers.V7 = self.registers.V7 ^ self.registers.V7;
+        self.registers.V8 = self.registers.V8 ^ self.registers.V8;
+        self.registers.V9 = self.registers.V9 ^ self.registers.V9;
+        self.registers.VA = self.registers.VA ^ self.registers.VA;
+        self.registers.VB = self.registers.VB ^ self.registers.VB;
+        self.registers.VC = self.registers.VC ^ self.registers.VC;
+        self.registers.VD = self.registers.VD ^ self.registers.VD;
+        self.registers.VE = self.registers.VE ^ self.registers.VE;
+        self.registers.VF = self.registers.VF ^ self.registers.VF;
         self.registers.I = self.registers.I ^ self.registers.I;
         self.registers.PC = self.registers.PC ^ self.registers.PC;
 
         self.memory = [0u8; 4096];
-        self.stack = [16u16; 16];
+        self.stack = vec![0u16; 16];
     }
 
     fn cycle(&mut self) {
         let opcode = self.fetch_instruction();
         let instruction = self.parse_opcode(opcode);
-        
-        println!("{:?}", instruction);
         self.execute(instruction);
     }
 
@@ -217,16 +230,47 @@ impl CPU {
 
     fn execute(&mut self, instruction: Instruction) {
         match instruction {
-            Instruction::SETI { value: val } => self.SETI(val),
-            _ => eprintln!("Unexpected instruction"),
+            Instruction::Call { address: a } => self.Call(a),
+            Instruction::SET { register: r, value: v } => self.SET(r, v),
+            Instruction::SETI { value: v } => self.SETI(v),
+            _ => eprintln!("Unexpected instruction. Last instruction received: {:?}", instruction),
         };
     }
 
     fn SETI(&mut self, value: u16) {
         self.registers.I = value;
     }
+
+    fn Call(&mut self, address: u16) {
+        self.stack.push(self.registers.PC);
+        self.registers.PC = address;
+    }
+
+    fn SET(&mut self, register: Target_Register, value: u8) {
+        match register {
+            Target_Register::V0 => self.registers.V0 = value,
+            Target_Register::V1 => self.registers.V1 = value,
+            Target_Register::V2 => self.registers.V2 = value,
+            Target_Register::V3 => self.registers.V3 = value,
+            Target_Register::V4 => self.registers.V4 = value,
+            Target_Register::V5 => self.registers.V5 = value,
+            Target_Register::V6 => self.registers.V6 = value,
+            Target_Register::V7 => self.registers.V7 = value,
+            Target_Register::V8 => self.registers.V8 = value,
+            Target_Register::V9 => self.registers.V9 = value,
+            Target_Register::VA => self.registers.VA = value,
+            Target_Register::VB => self.registers.VB = value,
+            Target_Register::VC => self.registers.VC = value,
+            Target_Register::VD => self.registers.VD = value,
+            Target_Register::VE => self.registers.VE = value,
+            Target_Register::VF => self.registers.VF = value,
+            Target_Register::I => self.registers.I = value as u16,
+            Target_Register::PC => self.registers.PC = value as u16,
+            _ => eprintln!("Error setting register."),
+        };
+    }
     
-    fn print_state(&self) {
+    fn print_registers_state(&self) {
         println!("Current CPU registers
         {:?}", self.registers);
     }
@@ -242,15 +286,19 @@ fn main() {
         println!("Input grabbed successfully: return value - {}", x);
     };
     
-    chip8.load_rom(&input);
-    chip8.cycle();
+    match input_result {
+        Ok(x) => {
+            if let Ok(x) = chip8.load_rom(&input) {
+                // Loop in here
+                chip8.cycle();
+                chip8.cycle();
+                chip8.cycle();
 
-    chip8.print_state();
-    println!("Made it to the end");
-}
-
-fn power_on(rom: &Vec<u8>) {
-    for x in 0..10 {
-        println!("Byte {}: {:#X?}", x, rom[x]);
+                chip8.print_registers_state();
+            } else {
+                eprintln!("Error opening the file.");
+            };
+        },
+        Err(e) => eprintln!("Something went wrong with your input. Please try again."),
     };
 }
