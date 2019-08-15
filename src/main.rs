@@ -1,6 +1,7 @@
 use std::fs;
 use std::io;
 
+#[allow(non_snake_case)]
 #[derive(Debug)]
 struct Registers {
     V0: u8, V1: u8, V2: u8, V3: u8, V4: u8, V5: u8, V6: u8, V7: u8,
@@ -55,6 +56,7 @@ impl Target_Register {
 enum Instruction {
     // X, Y represent registers
     // N represents values
+    NOP,
     _Call { address: u16 }, // 0NNN
     Display, // 00E0 - Clear Screen
     Return, // 00EE - Return from subroutine
@@ -98,6 +100,7 @@ struct CPU {
     stack: Vec<u16>,
 }
 
+#[allow(non_snake_case)]
 #[allow(dead_code)]
 impl CPU {
     fn load_rom(&mut self, rom: &String) -> Result<&str, io::Error> {
@@ -163,14 +166,11 @@ impl CPU {
     fn parse_opcode(&mut self, opcode: u16) -> Instruction {
         // Decipher opcode and prepare registers accordingly
         let mut instruction = Instruction::JUMP { address: 0x200 };
-        let mask_instruction = 0b1111_0000_0000_0000;
-        let mask_value = 0b0000_1111_1111_1111;
-        let mask_register1 = 0b0000_1111_0000_0000;
-        let mask_register2 = 0b0000_0000_1111_0000;
 
-        match opcode & mask_instruction {
+        match opcode & 0xF000 {
             0x0000 => {
                 match opcode {
+                    0x0000 => instruction = Instruction::NOP,
                     0x00E0 => instruction = Instruction::Display,
                     0x00EE => instruction = Instruction::Return,
                     _ => eprintln!("Unexpected opcode: {:X}", opcode),
