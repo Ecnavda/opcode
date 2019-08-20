@@ -230,6 +230,7 @@ impl CPU {
 
     fn execute(&mut self, instruction: Instruction) {
         match instruction {
+            Instruction::Return => self.Return(),
             Instruction::Call { address: a } => self.Call(a),
             Instruction::JUMP { address: a } => self.JUMP(a),
             Instruction::SET { register: r, value: v } => self.SET(r, v),
@@ -274,6 +275,11 @@ impl CPU {
     fn JUMP(&mut self, address: u16) {
         self.registers.PC = address;
     }
+
+    fn Return(&mut self) {
+        // Handle this better than unwrapping
+        self.registers.PC = self.stack.pop().unwrap();
+    }
     
     fn print_registers_state(&self) {
         println!("Current CPU registers
@@ -300,7 +306,8 @@ fn main() {
                 chip8.cycle();
                 chip8.cycle();
                 chip8.cycle();
-
+                chip8.cycle();
+                chip8.cycle();
                 chip8.print_registers_state();
             } else {
                 eprintln!("Error opening the file.");
