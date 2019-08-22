@@ -301,14 +301,7 @@ fn main() {
         Ok(x) => {
             if let Ok(x) = chip8.load_rom(&input) {
                 // Loop in here
-                chip8.cycle();
-                chip8.cycle();
-                chip8.cycle();
-                chip8.cycle();
-                chip8.cycle();
-                chip8.cycle();
-                chip8.cycle();
-                chip8.print_registers_state();
+                debug_loop(&mut chip8);
             } else {
                 eprintln!("Error opening the file.");
             };
@@ -317,4 +310,20 @@ fn main() {
     };
 }
 
-
+fn debug_loop(chip8: &mut CPU) {
+    let mut input = String::new();
+    let mut sentinel = true;
+    
+    while sentinel {
+        input.clear();
+        if let Ok(_x) = io::stdin().read_line(&mut input) {
+            // TODO: Handle this better
+            match input.trim() {
+                "c" => chip8.cycle(),
+                "p" => chip8.print_registers_state(),
+                "b" => sentinel = false,
+                _ => println!("Please enter correct c, p, or b"),
+            };
+        };
+    };
+}
