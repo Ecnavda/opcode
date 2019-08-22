@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use rand::prelude::*;
 
 #[allow(non_snake_case)]
 #[derive(Debug)]
@@ -241,11 +242,14 @@ impl CPU {
             Instruction::Return => self.Return(),
             Instruction::Call { address: a } => self.Call(a),
             Instruction::SKEQ { register: r, value: v } => self.SKEQ(r, v),
+            Instruction::SKNEQ { register: r, value: v } => self.SKNEQ(r, v),
             Instruction::JUMP { address: a } => self.JUMP(a),
             Instruction::SET { register: r, value: v } => self.SET(r, v),
             Instruction::ADD { register: r, value: v } => self.ADD(r, v),
             Instruction::SETI { value: v } => self.SETI(v),
+            Instruction::RAND { register: r, value: v } => self.RAND(r, v),
             Instruction::DRAW { register1: r1, register2: r2, height: h } => self.DRAW(r1, r2, h),
+            Instruction::ADDI { register: r } => self.ADDI(r),
             _ => eprintln!("Unexpected instruction. Last instruction received: {:?}", instruction),
         };
     }
@@ -356,7 +360,71 @@ impl CPU {
             self.registers.PC += 2;
         };
     }
+
+    fn RAND(&mut self, register: Target_Register, value: u8) {
+       // Generate random number then call SET() 
+       let mut number: u8 = rand::random();
+       number &= value;
+
+       self.SET(register, number);
+    }
     
+    fn SKNEQ(&mut self, register: Target_Register, value: u8) {
+        let comp_val = match register {
+            Target_Register::V0 => if self.registers.V0 != value { true } else { false },
+            Target_Register::V1 => if self.registers.V1 != value { true } else { false },
+            Target_Register::V2 => if self.registers.V2 != value { true } else { false },
+            Target_Register::V3 => if self.registers.V3 != value { true } else { false },
+            Target_Register::V4 => if self.registers.V4 != value { true } else { false },
+            Target_Register::V5 => if self.registers.V5 != value { true } else { false },
+            Target_Register::V6 => if self.registers.V6 != value { true } else { false },
+            Target_Register::V7 => if self.registers.V7 != value { true } else { false },
+            Target_Register::V8 => if self.registers.V8 != value { true } else { false },
+            Target_Register::V9 => if self.registers.V9 != value { true } else { false },
+            Target_Register::VA => if self.registers.VA != value { true } else { false },
+            Target_Register::VB => if self.registers.VB != value { true } else { false },
+            Target_Register::VC => if self.registers.VC != value { true } else { false },
+            Target_Register::VD => if self.registers.VD != value { true } else { false },
+            Target_Register::VE => if self.registers.VE != value { true } else { false },
+            Target_Register::VF => if self.registers.VF != value { true } else { false },
+            Target_Register::I => if self.registers.I != value as u16 { true } else { false },
+            Target_Register::PC => if self.registers.PC != value as u16 { true } else { false },
+            _ => {
+                eprintln!("Error adding to register.");
+                false
+            },
+        };
+        
+        if comp_val {
+            self.registers.PC += 2;
+        };
+    }
+
+    fn ADDI(&mut self, register: Target_Register) {
+        // Add value in register X to register I
+        match register {
+            Target_Register::V0 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V1 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V2 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V3 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V4 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V5 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V6 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V7 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V8 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V9 => self.registers.I += self.registers.V0 as u16,
+            Target_Register::VA => self.registers.I += self.registers.V0 as u16,
+            Target_Register::VB => self.registers.I += self.registers.V0 as u16,
+            Target_Register::VC => self.registers.I += self.registers.V0 as u16,
+            Target_Register::VD => self.registers.I += self.registers.V0 as u16,
+            Target_Register::VE => self.registers.I += self.registers.V0 as u16,
+            Target_Register::VF => self.registers.I += self.registers.VF as u16,
+            Target_Register::I => self.registers.I += self.registers.I,
+            Target_Register::PC => self.registers.I += self.registers.PC,
+            _ => eprintln!("Error adding to register."),
+        };
+    }
+
     fn print_registers_state(&self) {
         println!("Current CPU registers
         {:?}", self.registers);
@@ -391,7 +459,7 @@ fn debug_loop(chip8: &mut CPU) {
     let mut sentinel = true;
     
     while sentinel {
-        println!("Enter c to run CPU cycle, p to print the current state of the registers, or b to break and terminate the program.");
+        println!("Enter c to run CPU cycle, s to skip through 10 cycles, p to print the current state of the registers, or b to break and terminate the program.");
         input.clear();
         if let Ok(_x) = io::stdin().read_line(&mut input) {
             // TODO: Handle this better
@@ -399,6 +467,11 @@ fn debug_loop(chip8: &mut CPU) {
                 "c" => chip8.debug_cycle(),
                 "p" => chip8.print_registers_state(),
                 "b" => sentinel = false,
+                "s" => {
+                    for _ in 0..10 {
+                        chip8.cycle();
+                    };
+                },
                 _ => println!("Please enter correct c, p, or b"),
             };
         };
