@@ -163,6 +163,14 @@ impl CPU {
         self.execute(instruction);
     }
 
+    fn debug_cycle(&mut self) {
+        let opcode = self.fetch_instruction();
+        println!("opcode: {:X}", opcode);
+        let instruction = self.parse_opcode(opcode);
+        println!("instruction: {:?}\n", instruction);
+        self.execute(instruction);
+    }
+
     fn parse_opcode(&mut self, opcode: u16) -> Instruction {
         // Decipher opcode and prepare registers accordingly
         let mut instruction = Instruction::JUMP { address: 0x200 };
@@ -232,9 +240,12 @@ impl CPU {
         match instruction {
             Instruction::Return => self.Return(),
             Instruction::Call { address: a } => self.Call(a),
+            Instruction::SKEQ { register: r, value: v } => self.SKEQ(r, v),
             Instruction::JUMP { address: a } => self.JUMP(a),
             Instruction::SET { register: r, value: v } => self.SET(r, v),
+            Instruction::ADD { register: r, value: v } => self.ADD(r, v),
             Instruction::SETI { value: v } => self.SETI(v),
+            Instruction::DRAW { register1: r1, register2: r2, height: h } => self.DRAW(r1, r2, h),
             _ => eprintln!("Unexpected instruction. Last instruction received: {:?}", instruction),
         };
     }
@@ -280,6 +291,71 @@ impl CPU {
         // Handle this better than unwrapping
         self.registers.PC = self.stack.pop().unwrap();
     }
+
+    fn ADD(&mut self, register: Target_Register, value: u8) {
+        // Carry flag is not taken into account with this instruction
+        
+        match register {
+            Target_Register::V0 => self.registers.V0 = self.registers.V0.wrapping_add(value),
+            Target_Register::V1 => self.registers.V1 = self.registers.V1.wrapping_add(value),
+            Target_Register::V2 => self.registers.V2 = self.registers.V2.wrapping_add(value),
+            Target_Register::V3 => self.registers.V3 = self.registers.V3.wrapping_add(value),
+            Target_Register::V4 => self.registers.V4 = self.registers.V4.wrapping_add(value),
+            Target_Register::V5 => self.registers.V5 = self.registers.V5.wrapping_add(value),
+            Target_Register::V6 => self.registers.V6 = self.registers.V6.wrapping_add(value),
+            Target_Register::V7 => self.registers.V7 = self.registers.V7.wrapping_add(value),
+            Target_Register::V8 => self.registers.V8 = self.registers.V8.wrapping_add(value),
+            Target_Register::V9 => self.registers.V9 = self.registers.V9.wrapping_add(value),
+            Target_Register::VA => self.registers.VA = self.registers.VA.wrapping_add(value),
+            Target_Register::VB => self.registers.VB = self.registers.VB.wrapping_add(value),
+            Target_Register::VC => self.registers.VC = self.registers.VC.wrapping_add(value),
+            Target_Register::VD => self.registers.VD = self.registers.VD.wrapping_add(value),
+            Target_Register::VE => self.registers.VE = self.registers.VE.wrapping_add(value),
+            Target_Register::VF => self.registers.VF = self.registers.VF.wrapping_add(value),
+            Target_Register::I => self.registers.I += value as u16,
+            Target_Register::PC => self.registers.PC += value as u16,
+            _ => eprintln!("Error adding to register."),
+        };
+    }
+
+    fn DRAW(&mut self, register1: Target_Register, register2: Target_Register, height: u8) {
+        // TODO: Graphics
+        // pull value from register1 and register 2 to use as X and Y coords
+    }
+
+    fn SKEQ(&mut self, register: Target_Register, value: u8) {
+        // Skip the next instruction if Register == Value
+        // let mut comp_val = false;
+
+        let comp_val = match register {
+            Target_Register::V0 => if self.registers.V0 == value { true } else { false },
+            Target_Register::V1 => if self.registers.V1 == value { true } else { false },
+            Target_Register::V2 => if self.registers.V2 == value { true } else { false },
+            Target_Register::V3 => if self.registers.V3 == value { true } else { false },
+            Target_Register::V4 => if self.registers.V4 == value { true } else { false },
+            Target_Register::V5 => if self.registers.V5 == value { true } else { false },
+            Target_Register::V6 => if self.registers.V6 == value { true } else { false },
+            Target_Register::V7 => if self.registers.V7 == value { true } else { false },
+            Target_Register::V8 => if self.registers.V8 == value { true } else { false },
+            Target_Register::V9 => if self.registers.V9 == value { true } else { false },
+            Target_Register::VA => if self.registers.VA == value { true } else { false },
+            Target_Register::VB => if self.registers.VB == value { true } else { false },
+            Target_Register::VC => if self.registers.VC == value { true } else { false },
+            Target_Register::VD => if self.registers.VD == value { true } else { false },
+            Target_Register::VE => if self.registers.VE == value { true } else { false },
+            Target_Register::VF => if self.registers.VF == value { true } else { false },
+            Target_Register::I => if self.registers.I == value as u16 { true } else { false },
+            Target_Register::PC => if self.registers.PC == value as u16 { true } else { false },
+            _ => {
+                eprintln!("Error adding to register.");
+                false
+            },
+        };
+        
+        if comp_val {
+            self.registers.PC += 2;
+        };
+    }
     
     fn print_registers_state(&self) {
         println!("Current CPU registers
@@ -315,11 +391,12 @@ fn debug_loop(chip8: &mut CPU) {
     let mut sentinel = true;
     
     while sentinel {
+        println!("Enter c to run CPU cycle, p to print the current state of the registers, or b to break and terminate the program.");
         input.clear();
         if let Ok(_x) = io::stdin().read_line(&mut input) {
             // TODO: Handle this better
             match input.trim() {
-                "c" => chip8.cycle(),
+                "c" => chip8.debug_cycle(),
                 "p" => chip8.print_registers_state(),
                 "b" => sentinel = false,
                 _ => println!("Please enter correct c, p, or b"),
