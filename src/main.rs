@@ -284,9 +284,14 @@ impl CPU {
         };
     }
 
-    fn _Call(&mut self) {
+    fn _Call(&mut self, address: u16) {
         // TODO: Implement function
         // This function calls an RCA 1802 program at an address
+    }
+
+    fn Display(&mut self) {
+        // TODO: Implement Function
+        // Clears the screen when called
     }
 
     fn Return(&mut self) {
@@ -359,7 +364,7 @@ impl CPU {
         };
     }
 
-    fn SKREQ(register1: Target_Register, register2: Target_Register) {
+    fn SKREQ(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Skip next instruction if specified registers are equal
     }
@@ -412,52 +417,52 @@ impl CPU {
         };
     }
 
-    fn COPYR(register1: Target_Register, register2: Target_Register) {
+    fn COPYR(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Copy from one register to another
     }
 
-    fn OR(register1: Target_Register, register2: Target_Register) {
+    fn OR(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Register1 = Register1 | Register2
     }
 
-    fn AND(register1: Target_Register, register2: Target_Register) {
+    fn AND(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Register1 = Register1 & Register2
     }
 
-    fn XOR(register1: Target_Register, register2: Target_Register) {
+    fn XOR(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Register1 = Register1 ^ Register2
     }
 
-    fn ADDR(register1: Target_Register, register2: Target_Register) {
+    fn ADDR(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Register1 += Register2 Affects the carry flag
     }
 
-    fn SUBX(register1: Target_Register, register2: Target_Register) {
+    fn SUBX(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Register1 -= Register2 Affects Borrow flag
     }
 
-    fn SHFTR(register1: Target_Register, register2: Target_Register) {
+    fn SHFTR(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Store LeastSignificantBit in flag register then shift register1 to the right by 1
     }
 
-    fn SUBY(register1: Target_Register, register2: Target_Register) {
+    fn SUBY(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Register1 = Register2 - Register1 Affects Borrow flag
     }
 
-    fn SHFTL(register1: Target_Register, register2: Target_Register) {
+    fn SHFTL(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Store MostSignificantBit in flag register then shift register1 to the left by 1
     }
 
-    fn SKRNEQ(register1: Target_Register, register2: Target_Register) {
+    fn SKRNEQ(&mut self, register1: Target_Register, register2: Target_Register) {
         // TODO: Implement Function
         // Skip next instruction if register1 and register2 are not equal
     }
@@ -466,7 +471,7 @@ impl CPU {
         self.registers.I = value;
     }
 
-    fn JMP0(address: u16) {
+    fn JMP0(&mut self, address: u16) {
         // TODO: Implement Function
         // PC = address + V0 register
     }
@@ -484,32 +489,32 @@ impl CPU {
         // pull value from register1 and register 2 to use as X and Y coords
     }
 
-    fn SKKEQ(register: Target_Register) {
+    fn SKKEQ(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Skip next instruction if key stored in register is pressed
     }
 
-    fn SKKNEQ(register: Target_Register) {
+    fn SKKNEQ(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Skip next instruction if key stored in register is not pressed
     }
 
-    fn SETXD(register: Target_Register) {
+    fn SETXD(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // register = delay timer
     }
 
-    fn STORE(register: Target_Register) {
+    fn STORE(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Store key press in register, blocks until key press
     }
 
-    fn SETD(register: Target_Register) {
+    fn SETD(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Set delay time to register
     }
 
-    fn SETS(register: Target_Register) {
+    fn SETS(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Set sound timer to register
     }
@@ -538,22 +543,22 @@ impl CPU {
         };
     }
 
-    fn SPRITE(register: Target_Register) {
+    fn SPRITE(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Set register I to address of register (Chars 0-F in hex represented by 4x5 font)
     }
 
-    fn BCD(register: Target_Register) {
+    fn BCD(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Check documentation for this
     }
 
-    fn DUMP(register: Target_Register) {
+    fn DUMP(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Dump registers from V0 to register specified at mem address in register I
     }
 
-    fn LOAD(register: Target_Register) {
+    fn LOAD(&mut self, register: Target_Register) {
         // TODO: Implement Function
         // Load registers from V0 to register specified at mem address in register I
     }
