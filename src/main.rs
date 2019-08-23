@@ -52,6 +52,21 @@ impl Target_Register {
     }
 }
 
+struct Timers {
+    // TODO: Implement their automatic decrement
+    delay: u8,
+    sound: u8,
+}
+
+impl Timers {
+    fn new() -> Timers {
+        Timers {
+            delay: 0,
+            sound: 0,
+        }
+    }
+}
+
 #[allow(dead_code)]
 #[derive(Debug)]
 enum Instruction {
@@ -99,6 +114,7 @@ struct CPU {
     registers: Registers,
     memory: [u8; 4096],
     stack: Vec<u16>,
+    timers: Timers,
 }
 
 #[allow(non_snake_case)]
@@ -131,6 +147,7 @@ impl CPU {
             registers: Registers::new(),
             memory: [0u8; 4096],
             stack: vec![0u16; 16],
+            timers: Timers::new(),
         }
     }
 
@@ -365,8 +382,57 @@ impl CPU {
     }
 
     fn SKREQ(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
         // Skip next instruction if specified registers are equal
+
+        let r1 = match register1 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        if r1 == r2 {
+            self.registers.PC += 2;
+        };
     }
 
     fn SET(&mut self, register: Target_Register, value: u8) {
@@ -418,33 +484,479 @@ impl CPU {
     }
 
     fn COPYR(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
-        // Copy from one register to another
+        // Copy value from register2 to register1
+        
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        match register1 {
+            Target_Register::V0 => self.registers.V0 = r2,
+            Target_Register::V1 => self.registers.V1 = r2,
+            Target_Register::V2 => self.registers.V2 = r2,
+            Target_Register::V3 => self.registers.V3 = r2,
+            Target_Register::V4 => self.registers.V4 = r2,
+            Target_Register::V5 => self.registers.V5 = r2,
+            Target_Register::V6 => self.registers.V6 = r2,
+            Target_Register::V7 => self.registers.V7 = r2,
+            Target_Register::V8 => self.registers.V8 = r2,
+            Target_Register::V9 => self.registers.V9 = r2,
+            Target_Register::VA => self.registers.VA = r2,
+            Target_Register::VB => self.registers.VB = r2,
+            Target_Register::VC => self.registers.VC = r2,
+            Target_Register::VD => self.registers.VD = r2,
+            Target_Register::VE => self.registers.VE = r2,
+            Target_Register::VF => self.registers.VF = r2,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn OR(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
         // Register1 = Register1 | Register2
+        
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        match register1 {
+            Target_Register::V0 => self.registers.V0 |= r2,
+            Target_Register::V1 => self.registers.V1 |= r2,
+            Target_Register::V2 => self.registers.V2 |= r2,
+            Target_Register::V3 => self.registers.V3 |= r2,
+            Target_Register::V4 => self.registers.V4 |= r2,
+            Target_Register::V5 => self.registers.V5 |= r2,
+            Target_Register::V6 => self.registers.V6 |= r2,
+            Target_Register::V7 => self.registers.V7 |= r2,
+            Target_Register::V8 => self.registers.V8 |= r2,
+            Target_Register::V9 => self.registers.V9 |= r2,
+            Target_Register::VA => self.registers.VA |= r2,
+            Target_Register::VB => self.registers.VB |= r2,
+            Target_Register::VC => self.registers.VC |= r2,
+            Target_Register::VD => self.registers.VD |= r2,
+            Target_Register::VE => self.registers.VE |= r2,
+            Target_Register::VF => self.registers.VF |= r2,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn AND(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
         // Register1 = Register1 & Register2
+
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        match register1 {
+            Target_Register::V0 => self.registers.V0 &= r2,
+            Target_Register::V1 => self.registers.V1 &= r2,
+            Target_Register::V2 => self.registers.V2 &= r2,
+            Target_Register::V3 => self.registers.V3 &= r2,
+            Target_Register::V4 => self.registers.V4 &= r2,
+            Target_Register::V5 => self.registers.V5 &= r2,
+            Target_Register::V6 => self.registers.V6 &= r2,
+            Target_Register::V7 => self.registers.V7 &= r2,
+            Target_Register::V8 => self.registers.V8 &= r2,
+            Target_Register::V9 => self.registers.V9 &= r2,
+            Target_Register::VA => self.registers.VA &= r2,
+            Target_Register::VB => self.registers.VB &= r2,
+            Target_Register::VC => self.registers.VC &= r2,
+            Target_Register::VD => self.registers.VD &= r2,
+            Target_Register::VE => self.registers.VE &= r2,
+            Target_Register::VF => self.registers.VF &= r2,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn XOR(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
         // Register1 = Register1 ^ Register2
+
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        match register1 {
+            Target_Register::V0 => self.registers.V0 ^= r2,
+            Target_Register::V1 => self.registers.V1 ^= r2,
+            Target_Register::V2 => self.registers.V2 ^= r2,
+            Target_Register::V3 => self.registers.V3 ^= r2,
+            Target_Register::V4 => self.registers.V4 ^= r2,
+            Target_Register::V5 => self.registers.V5 ^= r2,
+            Target_Register::V6 => self.registers.V6 ^= r2,
+            Target_Register::V7 => self.registers.V7 ^= r2,
+            Target_Register::V8 => self.registers.V8 ^= r2,
+            Target_Register::V9 => self.registers.V9 ^= r2,
+            Target_Register::VA => self.registers.VA ^= r2,
+            Target_Register::VB => self.registers.VB ^= r2,
+            Target_Register::VC => self.registers.VC ^= r2,
+            Target_Register::VD => self.registers.VD ^= r2,
+            Target_Register::VE => self.registers.VE ^= r2,
+            Target_Register::VF => self.registers.VF ^= r2,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn ADDR(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
-        // Register1 += Register2 Affects the carry flag
+        // Register1 += Register2 Affects the carry flag (set VF to 1)
+
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        match register1 {
+            Target_Register::V0 => {
+                let (value, flag) = self.registers.V0.overflowing_add(r2);
+                self.registers.V0 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V1 => {
+                let (value, flag) = self.registers.V1.overflowing_add(r2);
+                self.registers.V1 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V2 => {
+                let (value, flag) = self.registers.V2.overflowing_add(r2);
+                self.registers.V2 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V3 => {
+                let (value, flag) = self.registers.V3.overflowing_add(r2);
+                self.registers.V3 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V4 => {
+                let (value, flag) = self.registers.V4.overflowing_add(r2);
+                self.registers.V4 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V5 => {
+                let (value, flag) = self.registers.V5.overflowing_add(r2);
+                self.registers.V5 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V6 => {
+                let (value, flag) = self.registers.V6.overflowing_add(r2);
+                self.registers.V6 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V7 => {
+                let (value, flag) = self.registers.V7.overflowing_add(r2);
+                self.registers.V7 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V8 => {
+                let (value, flag) = self.registers.V8.overflowing_add(r2);
+                self.registers.V8 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V9 => {
+                let (value, flag) = self.registers.V9.overflowing_add(r2);
+                self.registers.V9 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VA => {
+                let (value, flag) = self.registers.VA.overflowing_add(r2);
+                self.registers.VA = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VB => {
+                let (value, flag) = self.registers.VB.overflowing_add(r2);
+                self.registers.VB = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VC => {
+                let (value, flag) = self.registers.VC.overflowing_add(r2);
+                self.registers.VC = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VD => {
+                let (value, flag) = self.registers.VD.overflowing_add(r2);
+                self.registers.VD = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VE => {
+                let (value, flag) = self.registers.VE.overflowing_add(r2);
+                self.registers.VE = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            //Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn SUBX(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
         // Register1 -= Register2 Affects Borrow flag
+
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            //Target_Register::VF => self.registers.VF,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        match register1 {
+            Target_Register::V0 => {
+                let (value, flag) = self.registers.V0.overflowing_sub(r2);
+                self.registers.V0 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V1 => {
+                let (value, flag) = self.registers.V1.overflowing_sub(r2);
+                self.registers.V1 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V2 => {
+                let (value, flag) = self.registers.V2.overflowing_sub(r2);
+                self.registers.V2 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V3 => {
+                let (value, flag) = self.registers.V3.overflowing_sub(r2);
+                self.registers.V3 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V4 => {
+                let (value, flag) = self.registers.V4.overflowing_sub(r2);
+                self.registers.V4 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V5 => {
+                let (value, flag) = self.registers.V5.overflowing_sub(r2);
+                self.registers.V5 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V6 => {
+                let (value, flag) = self.registers.V6.overflowing_sub(r2);
+                self.registers.V6 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V7 => {
+                let (value, flag) = self.registers.V7.overflowing_sub(r2);
+                self.registers.V7 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V8 => {
+                let (value, flag) = self.registers.V8.overflowing_sub(r2);
+                self.registers.V8 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::V9 => {
+                let (value, flag) = self.registers.V9.overflowing_sub(r2);
+                self.registers.V9 = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VA => {
+                let (value, flag) = self.registers.VA.overflowing_sub(r2);
+                self.registers.VA = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VB => {
+                let (value, flag) = self.registers.VB.overflowing_sub(r2);
+                self.registers.VB = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VC => {
+                let (value, flag) = self.registers.VC.overflowing_sub(r2);
+                self.registers.VC = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VD => {
+                let (value, flag) = self.registers.VD.overflowing_sub(r2);
+                self.registers.VD = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            Target_Register::VE => {
+                let (value, flag) = self.registers.VE.overflowing_sub(r2);
+                self.registers.VE = value;
+                if flag {
+                    self.registers.VF = 1;
+                };
+            },
+            //Target_Register::VF => self.registers.VF,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn SHFTR(&mut self, register1: Target_Register, register2: Target_Register) {
@@ -463,8 +975,57 @@ impl CPU {
     }
 
     fn SKRNEQ(&mut self, register1: Target_Register, register2: Target_Register) {
-        // TODO: Implement Function
         // Skip next instruction if register1 and register2 are not equal
+        
+        let r1 = match register1 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        let r2 = match register2 {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            Target_Register::VF => self.registers.VF,
+            //Target_Register::I => self.registers.I = value as u16,
+            //Target_Register::PC => self.registers.PC = value as u16,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
+
+        if r1 != r2 {
+            self.registers.PC += 2;
+        };
     }
 
     fn SETI(&mut self, value: u16) {
@@ -500,8 +1061,27 @@ impl CPU {
     }
 
     fn SETXD(&mut self, register: Target_Register) {
-        // TODO: Implement Function
         // register = delay timer
+
+        match register {
+            Target_Register::V0 => self.registers.V0 = self.timers.delay,
+            Target_Register::V1 => self.registers.V1 = self.timers.delay,
+            Target_Register::V2 => self.registers.V2 = self.timers.delay,
+            Target_Register::V3 => self.registers.V3 = self.timers.delay,
+            Target_Register::V4 => self.registers.V4 = self.timers.delay,
+            Target_Register::V5 => self.registers.V5 = self.timers.delay,
+            Target_Register::V6 => self.registers.V6 = self.timers.delay,
+            Target_Register::V7 => self.registers.V7 = self.timers.delay,
+            Target_Register::V8 => self.registers.V8 = self.timers.delay,
+            Target_Register::V9 => self.registers.V9 = self.timers.delay,
+            Target_Register::VA => self.registers.VA = self.timers.delay,
+            Target_Register::VB => self.registers.VB = self.timers.delay,
+            Target_Register::VC => self.registers.VC = self.timers.delay,
+            Target_Register::VD => self.registers.VD = self.timers.delay,
+            Target_Register::VE => self.registers.VE = self.timers.delay,
+            // TODO: Handle this case properly
+            _ => (),
+        };
     }
 
     fn STORE(&mut self, register: Target_Register) {
@@ -510,33 +1090,71 @@ impl CPU {
     }
 
     fn SETD(&mut self, register: Target_Register) {
-        // TODO: Implement Function
         // Set delay time to register
+
+        self.timers.delay = match register {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
     }
 
     fn SETS(&mut self, register: Target_Register) {
-        // TODO: Implement Function
         // Set sound timer to register
+
+        self.timers.sound = match register {
+            Target_Register::V0 => self.registers.V0,
+            Target_Register::V1 => self.registers.V1,
+            Target_Register::V2 => self.registers.V2,
+            Target_Register::V3 => self.registers.V3,
+            Target_Register::V4 => self.registers.V4,
+            Target_Register::V5 => self.registers.V5,
+            Target_Register::V6 => self.registers.V6,
+            Target_Register::V7 => self.registers.V7,
+            Target_Register::V8 => self.registers.V8,
+            Target_Register::V9 => self.registers.V9,
+            Target_Register::VA => self.registers.VA,
+            Target_Register::VB => self.registers.VB,
+            Target_Register::VC => self.registers.VC,
+            Target_Register::VD => self.registers.VD,
+            Target_Register::VE => self.registers.VE,
+            // TODO: Handle this case properly
+            _ => 0,
+        };
     }
 
     fn ADDI(&mut self, register: Target_Register) {
         // Add value in register X to register I
         match register {
             Target_Register::V0 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V1 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V2 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V3 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V4 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V5 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V6 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V7 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V8 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::V9 => self.registers.I += self.registers.V0 as u16,
-            Target_Register::VA => self.registers.I += self.registers.V0 as u16,
-            Target_Register::VB => self.registers.I += self.registers.V0 as u16,
-            Target_Register::VC => self.registers.I += self.registers.V0 as u16,
-            Target_Register::VD => self.registers.I += self.registers.V0 as u16,
-            Target_Register::VE => self.registers.I += self.registers.V0 as u16,
+            Target_Register::V1 => self.registers.I += self.registers.V1 as u16,
+            Target_Register::V2 => self.registers.I += self.registers.V2 as u16,
+            Target_Register::V3 => self.registers.I += self.registers.V3 as u16,
+            Target_Register::V4 => self.registers.I += self.registers.V4 as u16,
+            Target_Register::V5 => self.registers.I += self.registers.V5 as u16,
+            Target_Register::V6 => self.registers.I += self.registers.V6 as u16,
+            Target_Register::V7 => self.registers.I += self.registers.V7 as u16,
+            Target_Register::V8 => self.registers.I += self.registers.V8 as u16,
+            Target_Register::V9 => self.registers.I += self.registers.V9 as u16,
+            Target_Register::VA => self.registers.I += self.registers.VA as u16,
+            Target_Register::VB => self.registers.I += self.registers.VB as u16,
+            Target_Register::VC => self.registers.I += self.registers.VC as u16,
+            Target_Register::VD => self.registers.I += self.registers.VD as u16,
+            Target_Register::VE => self.registers.I += self.registers.VE as u16,
             Target_Register::VF => self.registers.I += self.registers.VF as u16,
             Target_Register::I => self.registers.I += self.registers.I,
             Target_Register::PC => self.registers.I += self.registers.PC,
