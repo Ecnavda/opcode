@@ -172,6 +172,11 @@ impl CPU {
         self.execute(instruction);
     }
 
+    fn print_registers_state(&self) {
+        println!("Current CPU registers
+        {:?}", self.registers);
+    }
+
     fn parse_opcode(&mut self, opcode: u16) -> Instruction {
         // Decipher opcode and prepare registers accordingly
         let mut instruction = Instruction::JUMP { address: 0x200 };
@@ -239,28 +244,124 @@ impl CPU {
 
     fn execute(&mut self, instruction: Instruction) {
         match instruction {
+            Instruction::NOP => (),
+            Instruction::_Call { address: a } => self._Call(a),
+            Instruction::Display => self.Display(),
             Instruction::Return => self.Return(),
+            Instruction::JUMP { address: a } => self.JUMP(a),
             Instruction::Call { address: a } => self.Call(a),
             Instruction::SKEQ { register: r, value: v } => self.SKEQ(r, v),
             Instruction::SKNEQ { register: r, value: v } => self.SKNEQ(r, v),
-            Instruction::JUMP { address: a } => self.JUMP(a),
+            Instruction::SKREQ { register1: r1, register2: r2 } => self.SKREQ(r1, r2),
             Instruction::SET { register: r, value: v } => self.SET(r, v),
             Instruction::ADD { register: r, value: v } => self.ADD(r, v),
+            Instruction::COPYR { register1: r1, register2: r2 } => self.COPYR(r1, r2),
+            Instruction::OR { register1: r1, register2: r2 } => self.OR(r1, r2),
+            Instruction::AND { register1: r1, register2: r2 } => self.AND(r1, r2),
+            Instruction::XOR { register1: r1, register2: r2 } => self.XOR(r1, r2),
+            Instruction::ADDR { register1: r1, register2: r2 } => self.ADDR(r1, r2),
+            Instruction::SUBX { register1: r1, register2: r2 } => self.SUBX(r1, r2),
+            Instruction::SHFTR { register1: r1, register2: r2 } => self.SHFTR(r1, r2),
+            Instruction::SUBY { register1: r1, register2: r2 } => self.SUBY(r1, r2),
+            Instruction::SHFTL { register1: r1, register2: r2 } => self.SHFTL(r1, r2),
+            Instruction::SKRNEQ { register1: r1, register2: r2 } => self.SKRNEQ(r1, r2),
             Instruction::SETI { value: v } => self.SETI(v),
+            Instruction::JMP0 { address: a } => self.JMP0(a),
             Instruction::RAND { register: r, value: v } => self.RAND(r, v),
             Instruction::DRAW { register1: r1, register2: r2, height: h } => self.DRAW(r1, r2, h),
+            Instruction::SKKEQ { register: r } => self.SKKEQ(r),
+            Instruction::SKKNEQ { register: r } => self.SKKNEQ(r),
+            Instruction::SETXD { register: r } => self.SETXD(r),
+            Instruction::STORE { register: r } => self.STORE(r),
+            Instruction::SETD { register: r } => self.SETD(r),
+            Instruction::SETS { register: r } => self.SETS(r),
             Instruction::ADDI { register: r } => self.ADDI(r),
+            Instruction::SPRITE { register: r } => self.SPRITE(r),
+            Instruction::BCD { register: r } => self.BCD(r),
+            Instruction::DUMP { register: r } => self.DUMP(r),
+            Instruction::LOAD { register: r } => self.LOAD(r),
             _ => eprintln!("Unexpected instruction. Last instruction received: {:?}", instruction),
         };
     }
 
-    fn SETI(&mut self, value: u16) {
-        self.registers.I = value;
+    fn _Call(&mut self) {
+        // TODO: Implement function
+        // This function calls an RCA 1802 program at an address
+    }
+
+    fn Return(&mut self) {
+        // Handle this better than unwrapping
+        self.registers.PC = self.stack.pop().unwrap();
+    }
+    
+    fn JUMP(&mut self, address: u16) {
+        self.registers.PC = address;
     }
 
     fn Call(&mut self, address: u16) {
         self.stack.push(self.registers.PC);
         self.registers.PC = address;
+    }
+
+    fn SKEQ(&mut self, register: Target_Register, value: u8) {
+        // Skip the next instruction if Register == Value
+
+        let comp_val = match register {
+            Target_Register::V0 => if self.registers.V0 == value { true } else { false },
+            Target_Register::V1 => if self.registers.V1 == value { true } else { false },
+            Target_Register::V2 => if self.registers.V2 == value { true } else { false },
+            Target_Register::V3 => if self.registers.V3 == value { true } else { false },
+            Target_Register::V4 => if self.registers.V4 == value { true } else { false },
+            Target_Register::V5 => if self.registers.V5 == value { true } else { false },
+            Target_Register::V6 => if self.registers.V6 == value { true } else { false },
+            Target_Register::V7 => if self.registers.V7 == value { true } else { false },
+            Target_Register::V8 => if self.registers.V8 == value { true } else { false },
+            Target_Register::V9 => if self.registers.V9 == value { true } else { false },
+            Target_Register::VA => if self.registers.VA == value { true } else { false },
+            Target_Register::VB => if self.registers.VB == value { true } else { false },
+            Target_Register::VC => if self.registers.VC == value { true } else { false },
+            Target_Register::VD => if self.registers.VD == value { true } else { false },
+            Target_Register::VE => if self.registers.VE == value { true } else { false },
+            Target_Register::VF => if self.registers.VF == value { true } else { false },
+            Target_Register::I => if self.registers.I == value as u16 { true } else { false },
+            Target_Register::PC => if self.registers.PC == value as u16 { true } else { false },
+        };
+        
+        if comp_val {
+            self.registers.PC += 2;
+        };
+    }
+
+    fn SKNEQ(&mut self, register: Target_Register, value: u8) {
+        let comp_val = match register {
+            Target_Register::V0 => if self.registers.V0 != value { true } else { false },
+            Target_Register::V1 => if self.registers.V1 != value { true } else { false },
+            Target_Register::V2 => if self.registers.V2 != value { true } else { false },
+            Target_Register::V3 => if self.registers.V3 != value { true } else { false },
+            Target_Register::V4 => if self.registers.V4 != value { true } else { false },
+            Target_Register::V5 => if self.registers.V5 != value { true } else { false },
+            Target_Register::V6 => if self.registers.V6 != value { true } else { false },
+            Target_Register::V7 => if self.registers.V7 != value { true } else { false },
+            Target_Register::V8 => if self.registers.V8 != value { true } else { false },
+            Target_Register::V9 => if self.registers.V9 != value { true } else { false },
+            Target_Register::VA => if self.registers.VA != value { true } else { false },
+            Target_Register::VB => if self.registers.VB != value { true } else { false },
+            Target_Register::VC => if self.registers.VC != value { true } else { false },
+            Target_Register::VD => if self.registers.VD != value { true } else { false },
+            Target_Register::VE => if self.registers.VE != value { true } else { false },
+            Target_Register::VF => if self.registers.VF != value { true } else { false },
+            Target_Register::I => if self.registers.I != value as u16 { true } else { false },
+            Target_Register::PC => if self.registers.PC != value as u16 { true } else { false },
+        };
+        
+        if comp_val {
+            self.registers.PC += 2;
+        };
+    }
+
+    fn SKREQ(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Skip next instruction if specified registers are equal
     }
 
     fn SET(&mut self, register: Target_Register, value: u8) {
@@ -283,17 +384,7 @@ impl CPU {
             Target_Register::VF => self.registers.VF = value,
             Target_Register::I => self.registers.I = value as u16,
             Target_Register::PC => self.registers.PC = value as u16,
-            _ => eprintln!("Error setting register."),
         };
-    }
-
-    fn JUMP(&mut self, address: u16) {
-        self.registers.PC = address;
-    }
-
-    fn Return(&mut self) {
-        // Handle this better than unwrapping
-        self.registers.PC = self.stack.pop().unwrap();
     }
 
     fn ADD(&mut self, register: Target_Register, value: u8) {
@@ -318,8 +409,74 @@ impl CPU {
             Target_Register::VF => self.registers.VF = self.registers.VF.wrapping_add(value),
             Target_Register::I => self.registers.I += value as u16,
             Target_Register::PC => self.registers.PC += value as u16,
-            _ => eprintln!("Error adding to register."),
         };
+    }
+
+    fn COPYR(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Copy from one register to another
+    }
+
+    fn OR(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Register1 = Register1 | Register2
+    }
+
+    fn AND(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Register1 = Register1 & Register2
+    }
+
+    fn XOR(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Register1 = Register1 ^ Register2
+    }
+
+    fn ADDR(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Register1 += Register2 Affects the carry flag
+    }
+
+    fn SUBX(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Register1 -= Register2 Affects Borrow flag
+    }
+
+    fn SHFTR(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Store LeastSignificantBit in flag register then shift register1 to the right by 1
+    }
+
+    fn SUBY(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Register1 = Register2 - Register1 Affects Borrow flag
+    }
+
+    fn SHFTL(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Store MostSignificantBit in flag register then shift register1 to the left by 1
+    }
+
+    fn SKRNEQ(register1: Target_Register, register2: Target_Register) {
+        // TODO: Implement Function
+        // Skip next instruction if register1 and register2 are not equal
+    }
+
+    fn SETI(&mut self, value: u16) {
+        self.registers.I = value;
+    }
+
+    fn JMP0(address: u16) {
+        // TODO: Implement Function
+        // PC = address + V0 register
+    }
+
+    fn RAND(&mut self, register: Target_Register, value: u8) {
+       // Generate random number then call SET() 
+       let mut number: u8 = random();
+       number &= value;
+
+       self.SET(register, number);
     }
 
     fn DRAW(&mut self, register1: Target_Register, register2: Target_Register, height: u8) {
@@ -327,77 +484,34 @@ impl CPU {
         // pull value from register1 and register 2 to use as X and Y coords
     }
 
-    fn SKEQ(&mut self, register: Target_Register, value: u8) {
-        // Skip the next instruction if Register == Value
-        // let mut comp_val = false;
-
-        let comp_val = match register {
-            Target_Register::V0 => if self.registers.V0 == value { true } else { false },
-            Target_Register::V1 => if self.registers.V1 == value { true } else { false },
-            Target_Register::V2 => if self.registers.V2 == value { true } else { false },
-            Target_Register::V3 => if self.registers.V3 == value { true } else { false },
-            Target_Register::V4 => if self.registers.V4 == value { true } else { false },
-            Target_Register::V5 => if self.registers.V5 == value { true } else { false },
-            Target_Register::V6 => if self.registers.V6 == value { true } else { false },
-            Target_Register::V7 => if self.registers.V7 == value { true } else { false },
-            Target_Register::V8 => if self.registers.V8 == value { true } else { false },
-            Target_Register::V9 => if self.registers.V9 == value { true } else { false },
-            Target_Register::VA => if self.registers.VA == value { true } else { false },
-            Target_Register::VB => if self.registers.VB == value { true } else { false },
-            Target_Register::VC => if self.registers.VC == value { true } else { false },
-            Target_Register::VD => if self.registers.VD == value { true } else { false },
-            Target_Register::VE => if self.registers.VE == value { true } else { false },
-            Target_Register::VF => if self.registers.VF == value { true } else { false },
-            Target_Register::I => if self.registers.I == value as u16 { true } else { false },
-            Target_Register::PC => if self.registers.PC == value as u16 { true } else { false },
-            _ => {
-                eprintln!("Error adding to register.");
-                false
-            },
-        };
-        
-        if comp_val {
-            self.registers.PC += 2;
-        };
+    fn SKKEQ(register: Target_Register) {
+        // TODO: Implement Function
+        // Skip next instruction if key stored in register is pressed
     }
 
-    fn RAND(&mut self, register: Target_Register, value: u8) {
-       // Generate random number then call SET() 
-       let mut number: u8 = rand::random();
-       number &= value;
-
-       self.SET(register, number);
+    fn SKKNEQ(register: Target_Register) {
+        // TODO: Implement Function
+        // Skip next instruction if key stored in register is not pressed
     }
-    
-    fn SKNEQ(&mut self, register: Target_Register, value: u8) {
-        let comp_val = match register {
-            Target_Register::V0 => if self.registers.V0 != value { true } else { false },
-            Target_Register::V1 => if self.registers.V1 != value { true } else { false },
-            Target_Register::V2 => if self.registers.V2 != value { true } else { false },
-            Target_Register::V3 => if self.registers.V3 != value { true } else { false },
-            Target_Register::V4 => if self.registers.V4 != value { true } else { false },
-            Target_Register::V5 => if self.registers.V5 != value { true } else { false },
-            Target_Register::V6 => if self.registers.V6 != value { true } else { false },
-            Target_Register::V7 => if self.registers.V7 != value { true } else { false },
-            Target_Register::V8 => if self.registers.V8 != value { true } else { false },
-            Target_Register::V9 => if self.registers.V9 != value { true } else { false },
-            Target_Register::VA => if self.registers.VA != value { true } else { false },
-            Target_Register::VB => if self.registers.VB != value { true } else { false },
-            Target_Register::VC => if self.registers.VC != value { true } else { false },
-            Target_Register::VD => if self.registers.VD != value { true } else { false },
-            Target_Register::VE => if self.registers.VE != value { true } else { false },
-            Target_Register::VF => if self.registers.VF != value { true } else { false },
-            Target_Register::I => if self.registers.I != value as u16 { true } else { false },
-            Target_Register::PC => if self.registers.PC != value as u16 { true } else { false },
-            _ => {
-                eprintln!("Error adding to register.");
-                false
-            },
-        };
-        
-        if comp_val {
-            self.registers.PC += 2;
-        };
+
+    fn SETXD(register: Target_Register) {
+        // TODO: Implement Function
+        // register = delay timer
+    }
+
+    fn STORE(register: Target_Register) {
+        // TODO: Implement Function
+        // Store key press in register, blocks until key press
+    }
+
+    fn SETD(register: Target_Register) {
+        // TODO: Implement Function
+        // Set delay time to register
+    }
+
+    fn SETS(register: Target_Register) {
+        // TODO: Implement Function
+        // Set sound timer to register
     }
 
     fn ADDI(&mut self, register: Target_Register) {
@@ -421,13 +535,27 @@ impl CPU {
             Target_Register::VF => self.registers.I += self.registers.VF as u16,
             Target_Register::I => self.registers.I += self.registers.I,
             Target_Register::PC => self.registers.I += self.registers.PC,
-            _ => eprintln!("Error adding to register."),
         };
     }
 
-    fn print_registers_state(&self) {
-        println!("Current CPU registers
-        {:?}", self.registers);
+    fn SPRITE(register: Target_Register) {
+        // TODO: Implement Function
+        // Set register I to address of register (Chars 0-F in hex represented by 4x5 font)
+    }
+
+    fn BCD(register: Target_Register) {
+        // TODO: Implement Function
+        // Check documentation for this
+    }
+
+    fn DUMP(register: Target_Register) {
+        // TODO: Implement Function
+        // Dump registers from V0 to register specified at mem address in register I
+    }
+
+    fn LOAD(register: Target_Register) {
+        // TODO: Implement Function
+        // Load registers from V0 to register specified at mem address in register I
     }
 }
 
